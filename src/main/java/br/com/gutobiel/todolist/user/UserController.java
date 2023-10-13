@@ -1,5 +1,8 @@
 package br.com.gutobiel.todolist.user;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,11 +12,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/users")
 
 public class UserController {
+
+    @Autowired
+    private IUserRepository userRepository;
+    
+
     @PostMapping("/")
-    public void create(@RequestBody UserModel userModel){
-        System.out.println("Username: " + userModel.getUsername() + " \nName: " + userModel.getName() + " \nPassword: " + userModel.getPassword());
-        System.out.println("Username: " + userModel.getUsername());
-        System.out.println("Password: " + userModel.getPassword());
-        System.out.println("Name: " + userModel.getName());
+    public ResponseEntity create(@RequestBody UserModel userModel){
+        var user = this.userRepository.findByUsername(userModel.getUsername());
+        
+        if(user != null) {
+            //Mensagem de erro
+            //Status code
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário não existe");
+        }
+
+        var userCreated = this.userRepository.save(userModel);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(userCreated);
+        
+        
+        
+        
+        /* 
+        System.out.println("Username: " + userModel.getUsername() 
+                          + " \nName: " + userModel.getName() 
+                      + " \nPassword: " + userModel.getPassword()); 
+        */
     }
 }
